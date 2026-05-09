@@ -5,6 +5,9 @@ const path = require('path');
 
 const routes = require('./routes');
 
+const fs = require('fs');
+if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
