@@ -1,11 +1,30 @@
 const fs = require('fs');
 const path = require('path');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const PRODUCTS = [
   { id: 'tela_quadrada_media', name: 'Tela Quadrada Media 30x30', base_price: 89.90, formato: 'square', dimensao: '30x30cm' },
   { id: 'tela_horizontal_media', name: 'Tela Horizontal Media 40x30', base_price: 99.90, formato: 'landscape', dimensao: '40x30cm' },
   { id: 'tela_vertical_media', name: 'Tela Vertical Media 30x40', base_price: 99.90, formato: 'portrait', dimensao: '30x40cm' },
 ];
+
+async function uploadToCloudinary(imageBuffer) {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { folder: 'artela', resource_type: 'image' },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    ).end(imageBuffer);
+  });
+}
 
 async function generateProductImages(photoPath) {
   const apiKey = process.env.NANO_BANANA_API_KEY;
@@ -61,19 +80,18 @@ async function generateProductImages(photoPath) {
       const imageData = imagePart && (imagePart.inlineData ? imagePart.inlineData.data : imagePart.inline_data.data);
 
       if (imageData) {
-        const generatedFilename = 'generated_' + product.id + '_' + Date.now() + '.png';
-        const generatedPath = path.join(__dirname, '../../uploads', generatedFilename);
-        fs.writeFileSync(generatedPath, Buffer.from(imageData, 'base64'));
+        const imageBuffer = Buffer.from(imageData, 'base64');
+        const cloudinaryUrl = await uploadToCloudinary(imageBuffer);
+
         results.push({
           product_id: product.id,
           product_name: product.name,
-          image_url: 'http://localhost:3001/uploads/' + generatedFilename,
+          image_url: cloudinaryUrl,
           base_price: product.base_price,
         });
-        console.log('OK: ' + product.name + ' gerada!');
+        console.log('OK: ' + product.name + ' gerada e upada no Cloudinary!');
       } else {
         console.warn('Sem imagem na resposta para ' + product.name);
-        console.warn('Resposta parcial:', JSON.stringify(data).substring(0, 400));
         results.push(placeholderProduct(product));
       }
 
