@@ -3,7 +3,8 @@ const db = require('../database');
 
 async function createCheckout(req, res) {
   try {
-    const { user_id, items } = req.body; console.log("Checkout recebido:", JSON.stringify({ user_id, items_count: items?.length }));
+    const { user_id, items } = req.body;
+    console.log("Checkout recebido:", JSON.stringify({ user_id, items_count: items?.length }));
 
     if (!user_id || !items || items.length === 0) {
       return res.status(400).json({ error: 'Pedido invalido.' });
@@ -24,7 +25,6 @@ async function createCheckout(req, res) {
       insertItem.run(uuidv4(), orderId, item.product_id, item.product_name, item.size, item.price, item.image_url, item.quantity);
     }
 
-    // Cria preferencia no Mercado Pago
     const mpItems = items.map(item => ({
       title: item.product_name + ' (' + item.size + ')',
       quantity: item.quantity,
@@ -40,10 +40,7 @@ async function createCheckout(req, res) {
       },
       body: JSON.stringify({
         items: mpItems,
-        payer: {
-          name: user.name,
-          email: user.email,
-        },
+        payer: { name: user.name, email: user.email },
         external_reference: orderId,
         notification_url: process.env.BASE_URL + '/api/webhook/mercadopago',
         back_urls: {
@@ -51,23 +48,22 @@ async function createCheckout(req, res) {
           failure: process.env.FRONTEND_URL + '/pedido/erro',
           pending: process.env.FRONTEND_URL + '/pedido/pendente',
         },
-        
       })
     });
 
-    const mpData = await mpResponse.json(); console.log("MP resposta:", JSON.stringify(mpData));
+    const mpData = await mpResponse.json();
+    console.log("MP resposta:", JSON.stringify(mpData));
 
     if (!mpResponse.ok) {
-      console.error("Erro Mercado Pago:", JSON.stringify(mpData)); console.error("Status:", mpResponse.status);
+      console.error("Erro Mercado Pago:", JSON.stringify(mpData));
       return res.status(500).json({ error: 'Erro ao criar pagamento.' });
     }
 
-    // Salva o ID da preferencia no pedido
     db.prepare('UPDATE orders SET mp_preference_id = ? WHERE id = ?').run(mpData.id, orderId);
 
     return res.status(201).json({
       orderId,
-      checkoutUrl: mpData.sandbox_init_point, // URL de pagamento sandbox
+      checkoutUrl: mpData.sandbox_init_point,
       total,
     });
 
@@ -77,7 +73,6 @@ async function createCheckout(req, res) {
   }
 }
 
-// Webhook do Mercado Pago
 async function webhookMercadoPago(req, res) {
   try {
     const { type, data } = req.body;
@@ -85,7 +80,6 @@ async function webhookMercadoPago(req, res) {
     if (type === 'payment') {
       const paymentId = data.id;
 
-      // Busca detalhes do pagamento
       const mpResponse = await fetch('https://api.mercadopago.com/v1/payments/' + paymentId, {
         headers: { 'Authorization': 'Bearer ' + process.env.MP_ACCESS_TOKEN }
       });
@@ -139,6 +133,7 @@ function updateOrderStatus(req, res) {
   }
 }
 
+// FIX: getUploads agora está devidamente definida e exportada
 function getUploads(req, res) {
   try {
     const uploads = db.prepare(`
@@ -155,4 +150,5 @@ function getUploads(req, res) {
   }
 }
 
-module.exports = { createCheckout, webhookMercadoPago, getProductionQueue, updateOrderStatus };
+// FIX: getUploads incluída no exports
+module.exports = { createCheckout, webhookMercadoPago, getProductionQueue, updateOrderStatus, getUploads };

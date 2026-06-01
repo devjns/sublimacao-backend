@@ -3,7 +3,13 @@ const router = express.Router();
 const upload = require('../middlewares/upload');
 const { registerAndUpload } = require('../controllers/uploadController');
 const { getGallery } = require('../controllers/galleryController');
-const { createCheckout, webhookMercadoPago, getProductionQueue, updateOrderStatus } = require('../controllers/orderController');
+const {
+  createCheckout,
+  webhookMercadoPago,
+  getProductionQueue,
+  updateOrderStatus,
+  getUploads, // FIX: agora importado corretamente do orderController
+} = require('../controllers/orderController');
 
 // Upload + cadastro
 router.post('/upload', upload.single('photo'), registerAndUpload);
@@ -21,6 +27,7 @@ router.post('/webhook/mercadopago', webhookMercadoPago);
 router.get('/admin/queue', getProductionQueue);
 router.patch('/admin/orders/:id/status', updateOrderStatus);
 
+// FIX: rota agora funciona pois getUploads está importada
 router.get('/admin/uploads', getUploads);
 
 module.exports = router;
