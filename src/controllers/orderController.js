@@ -139,4 +139,20 @@ function updateOrderStatus(req, res) {
   }
 }
 
+function getUploads(req, res) {
+  try {
+    const uploads = db.prepare(`
+      SELECT a.id, a.status, a.created_at,
+             u.name, u.email, u.whatsapp
+      FROM generated_arts a
+      JOIN users u ON a.user_id = u.id
+      ORDER BY a.created_at DESC
+    `).all();
+    return res.json(uploads);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Erro ao buscar uploads.' });
+  }
+}
+
 module.exports = { createCheckout, webhookMercadoPago, getProductionQueue, updateOrderStatus };

@@ -21,4 +21,6 @@ router.post('/webhook/mercadopago', webhookMercadoPago);
 router.get('/admin/queue', getProductionQueue);
 router.patch('/admin/orders/:id/status', updateOrderStatus);
 
+router.get('/admin/uploads', getUploads);
+
 module.exports = router;
