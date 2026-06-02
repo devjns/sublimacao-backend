@@ -28,7 +28,8 @@ async function uploadToCloudinary(imageBuffer) {
 
 async function generateProductImages(photoPath) {
   const apiKey = process.env.NANO_BANANA_API_KEY;
-  if (!apiKey) throw new Error('NANO_BANANA_API_KEY nao configurada no .env');
+console.log('API KEY:', apiKey ? 'OK (' + apiKey.slice(0, 8) + '...)' : 'UNDEFINED');
+if (!apiKey) throw new Error('Must supply api_key');
 
   const photoBuffer = fs.readFileSync(photoPath);
   const base64Photo = photoBuffer.toString('base64');
