@@ -133,11 +133,11 @@ function updateOrderStatus(req, res) {
   }
 }
 
-// FIX: getUploads agora está devidamente definida e exportada
+// FIX: getUploads agora retorna access_token para montar o link da galeria no frontend
 function getUploads(req, res) {
   try {
     const uploads = db.prepare(`
-      SELECT a.id, a.status, a.created_at,
+      SELECT a.id, a.status, a.created_at, a.access_token,
              u.name, u.email, u.whatsapp
       FROM generated_arts a
       JOIN users u ON a.user_id = u.id

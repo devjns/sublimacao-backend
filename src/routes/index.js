@@ -8,7 +8,7 @@ const {
   webhookMercadoPago,
   getProductionQueue,
   updateOrderStatus,
-  getUploads, // FIX: agora importado corretamente do orderController
+  getUploads, // FIX: importado corretamente do orderController
 } = require('../controllers/orderController');
 
 // Upload + cadastro
