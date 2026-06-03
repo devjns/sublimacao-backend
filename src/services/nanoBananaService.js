@@ -71,10 +71,10 @@ if (!apiKey) throw new Error('Must supply api_key');
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Erro API ' + product.name + ':', JSON.stringify(data.error || data));
-        results.push(placeholderProduct(product));
-        continue;
-      }
+  console.error('Erro API ' + product.name + ' STATUS ' + response.status + ':', JSON.stringify(data));
+  results.push(placeholderProduct(product));
+  continue;
+}
 
       const parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
       const imagePart = parts && parts.find(function(p) { return p.inlineData || p.inline_data; });
