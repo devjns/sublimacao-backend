@@ -99,9 +99,9 @@ if (!apiKey) throw new Error('Must supply api_key');
       await new Promise(function(resolve) { setTimeout(resolve, 3000); });
 
     } catch (err) {
-      console.error('Erro ' + product.name + ':', err.message);
-      results.push(placeholderProduct(product));
-    }
+  console.error('Erro ' + product.name + ' CATCH:', err.message, err.stack);
+  results.push(placeholderProduct(product));
+}
   }
 
   return results;
